@@ -1,9 +1,9 @@
-Nandinee, you’ve done the heavy lifting today! Switching a whole project from SQL to MongoDB in a few hours is a massive win for a final-year IT student.
 
-Here is your professional, all-English README.md that will look great on GitHub and impress Ketan sir during the presentation.
 
-🚗 Car Service Management System (MERN)
+# 🚗 Car Service Management System (MERN)
 A comprehensive full-stack application designed to modernize car service center operations. This project features a robust role-based system for customers and administrators to manage the end-to-end service lifecycle.
+
+#live:https://car-service-mern-final.vercel.app/
 
 🛠️ Tech Stack
 Frontend: React.js, Tailwind CSS, Axios
