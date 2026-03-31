@@ -28,9 +28,9 @@ This system provides a seamless and intuitive experience with secure authenticat
 ## 🔑 Test Credentials  
 
 ### **Admin Access**
--- Email: admin@gmail.com
+-- Email: finaladmin@gmail.com
 
---Password: 123456
+--Password:admin123
 
 
 ### **Customer Access**
