@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
-// YAHAN CHECK KAREIN: Localhost hi hona chahiye
 const API_URL = `${API_BASE}/bookings/history`;
 
 function BookingHistory() {
@@ -14,15 +13,9 @@ function BookingHistory() {
       if (!token) throw new Error('No token found.');
 
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      
-      // Request bhejte waqt console check
-      console.log("Fetching from:", API_URL);
       const response = await axios.get(API_URL, config);
-      
-      console.log("Data received from Backend:", response.data);
       setBookings(response.data);
     } catch (err) {
-      console.error("Fetch error:", err);
       setError('Could not load your booking history.');
     }
   }, []);
@@ -56,13 +49,18 @@ function BookingHistory() {
           <tbody>
             {bookings.length > 0 ? (
               bookings.map((booking) => (
-                <tr key={booking.id}>
-                  <td>{booking.make ? `${booking.make} ${booking.model}` : 'Unknown Vehicle'}</td>
+                // ⚠️ MongoDB uses _id
+                <tr key={booking._id}>
+                  <td>
+                    {/* ⚠️ Mongoose populate data access */}
+                    {booking.vehicle_id?.make 
+                      ? `${booking.vehicle_id.make} ${booking.vehicle_id.model}` 
+                      : 'Unknown Vehicle'}
+                  </td>
                   <td>{booking.service_type}</td>
                   <td>{formatDate(booking.booking_date)}</td>
                   <td>{booking.time_slot}</td>
                   <td>
-                    {/* Status null hone par 'Pending' dikhayega */}
                     <span className={`status-badge status-${(booking.status || 'Pending').toLowerCase()}`}>
                       {booking.status || 'Pending'}
                     </span>

@@ -1,55 +1,40 @@
 const express = require('express');
-const { protect, isAdmin } = require('../middleware/authMiddleware'); // <--- Dono import karein
+const router = express.Router();
+const Booking = require('../models/Booking');
+const { protect, isAdmin } = require('../middleware/authMiddleware');
 
-module.exports = (db) => {
-  const router = express.Router();
+router.get('/stats', protect, isAdmin, async (req, res) => {
+  try {
+    const total = await Booking.countDocuments();
+    const active = await Booking.countDocuments({ status: { $in: ['Booking Confirmed', 'Vehicle Dropped Off', 'Service In Progress'] } });
+    const ready = await Booking.countDocuments({ status: 'Ready for Pickup' });
+    const completed = await Booking.countDocuments({ status: 'Service Completed' });
 
-  // 1. GET Admin Stats
-  router.get('/stats', protect, isAdmin, async (req, res) => {
-    try {
-      const stats = await db.query(`
-        SELECT 
-          COUNT(*) as total,
-          COUNT(*) FILTER (WHERE status IN ('Booking Confirmed', 'Vehicle Dropped Off', 'Service In Progress')) as active,
-          COUNT(*) FILTER (WHERE status = 'Ready for Pickup') as ready,
-          COUNT(*) FILTER (WHERE status = 'Service Completed') as completed
-        FROM bookings
-      `);
-      res.json(stats.rows[0]);
-    } catch (err) {
-      res.status(500).json({ message: "Failed to fetch stats" });
-    }
-  });
+    res.json({ total, active, ready, completed });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch stats" });
+  }
+});
 
-  // 2. GET All Bookings
-  router.get('/bookings', protect, isAdmin, async (req, res) => {
-    try {
-      const result = await db.query(
-        `SELECT b.id, b.service_type, b.booking_date, b.time_slot, b.status,
-                u.name as user_name, u.email, 
-                v.make, v.model, v.registration_number
-         FROM bookings b
-         LEFT JOIN users u ON b.user_id = u.id
-         LEFT JOIN vehicles v ON b.vehicle_id = v.id
-         ORDER BY b.booking_date DESC`
-      );
-      res.json(result.rows);
-    } catch (err) {
-      res.status(500).json({ message: "Database Error" });
-    }
-  });
+router.get('/bookings', protect, isAdmin, async (req, res) => {
+  try {
+    const bookings = await Booking.find()
+      .populate('user_id', 'name email')
+      .populate('vehicle_id', 'make model registration_number')
+      .sort({ booking_date: -1 });
+    res.json(bookings);
+  } catch (err) {
+    res.status(500).json({ message: "Database Error" });
+  }
+});
 
-  // 3. PUT Update Status
-  router.put('/bookings/:id/status', protect, isAdmin, async (req, res) => {
-    const { id } = req.params;
-    const { status } = req.body;
-    try {
-      await db.query("UPDATE bookings SET status = $1 WHERE id = $2", [status, id]);
-      res.json({ message: "Status updated successfully" });
-    } catch (err) {
-      res.status(500).json({ message: "Failed to update status" });
-    }
-  });
+router.put('/bookings/:id/status', protect, isAdmin, async (req, res) => {
+  try {
+    await Booking.findByIdAndUpdate(req.params.id, { status: req.body.status });
+    res.json({ message: "Status updated successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update status" });
+  }
+});
 
-  return router;
-};
+module.exports = router;

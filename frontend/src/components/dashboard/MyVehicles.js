@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+
 function MyVehicles() {
   const [vehicles, setVehicles] = useState([]);
   const [formData, setFormData] = useState({ make: '', model: '', registration_number: '' });
-  const [editingId, setEditingId] = useState(null); // Edit tracking ke liye
+  const [editingId, setEditingId] = useState(null); 
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  // ⚠️ Note: Local testing ke liye localhost use karein, 
-  // Deployment ke liye apni render wali URL.
   const API_URL = `${API_BASE}/vehicles`;
 
   const fetchVehicles = useCallback(async () => {
@@ -23,7 +23,7 @@ function MyVehicles() {
     } catch (err) {
       setError(err.response?.data?.message || 'Could not load your vehicles.');
     }
-  }, []);
+  }, [API_URL]);
 
   useEffect(() => {
     fetchVehicles();
@@ -43,11 +43,9 @@ function MyVehicles() {
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
       if (editingId) {
-        // UPDATE Logic
         const response = await axios.put(`${API_URL}/${editingId}`, formData, config);
         setMessage(response.data.message);
       } else {
-        // ADD Logic
         const response = await axios.post(`${API_URL}/add`, formData, config);
         setMessage(response.data.message);
       }
@@ -74,12 +72,13 @@ function MyVehicles() {
   };
 
   const startEdit = (v) => {
-    setEditingId(v.id);
+    // ⚠️ CHANGE 1: v.id ko v._id kiya
+    setEditingId(v._id);
     setFormData({ make: v.make, model: v.model, registration_number: v.registration_number });
-    window.scrollTo(0, 0); // Scroll to form
+    window.scrollTo(0, 0); 
   };
 
- return (
+  return (
     <div className="content-section">
       <h2>My Vehicles</h2>
       {message && <p className="auth-message success">{message}</p>}
@@ -129,14 +128,16 @@ function MyVehicles() {
             {vehicles.length > 0 ? (
               <div className="vehicle-items-container">
                 {vehicles.map((v) => (
-                  <div key={v.id} className="vehicle-card">
+                  // ⚠️ CHANGE 2: key={v.id} ko v._id kiya
+                  <div key={v._id} className="vehicle-card">
                     <div className="vehicle-info">
                       <span className="vehicle-name">{v.make} {v.model}</span>
                       <span className="vehicle-reg">{v.registration_number}</span>
                     </div>
                     <div className="vehicle-actions">
                       <button onClick={() => startEdit(v)} className="btn-action btn-edit">Edit</button>
-                      <button onClick={() => handleDelete(v.id)} className="btn-action btn-delete">Delete</button>
+                      {/* ⚠️ CHANGE 3: handleDelete(v.id) ko v._id kiya */}
+                      <button onClick={() => handleDelete(v._id)} className="btn-action btn-delete">Delete</button>
                     </div>
                   </div>
                 ))}

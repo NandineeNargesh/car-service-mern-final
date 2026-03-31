@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 const API_BASE_ADMIN = `${API_BASE}/admin`;
 
@@ -52,17 +53,17 @@ function AdminDashboardPage() {
       await axios.put(`${API_BASE_ADMIN}/bookings/${bookingId}/status`, { status: newStatus }, config);
       setMessage("Status updated successfully!");
       fetchAllBookings();
-      fetchStats(); // Update stats as well
+      fetchStats(); 
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
       setError('Failed to update status.');
     }
   };
 
-  // --- LOGIC: Return se pehle filtering karein ---
+  // --- LOGIC: MongoDB ke nested data (user_id, vehicle_id) ke hisaab se filter ---
   const filteredBookings = bookings.filter(b => 
-    b.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    b.registration_number?.toLowerCase().includes(searchTerm.toLowerCase())
+    b.user_id?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    b.vehicle_id?.registration_number?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -75,7 +76,6 @@ function AdminDashboardPage() {
         <button onClick={handleLogout} className="admin-logout-pill">Logout</button>
       </div>
 
-      {/* Stats Section */}
       <div className="admin-stats-grid">
         <div className="stat-card">
           <span className="stat-label">Total Bookings</span>
@@ -95,7 +95,6 @@ function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Actions Bar (Search + Results) */}
       <div className="admin-actions-bar">
         <div className="left-actions">
           <span className="results-count">Results: {filteredBookings.length}</span>
@@ -129,17 +128,20 @@ function AdminDashboardPage() {
           <tbody>
             {filteredBookings.length > 0 ? (
               filteredBookings.map((b) => (
-                <tr key={b.id}>
+                // ⚠️ MongoDB uses _id
+                <tr key={b._id}>
                   <td>
                     <div className="info-stack">
-                      <span className="name-primary">{b.user_name}</span>
-                      <span className="email-secondary">{b.email}</span>
+                      {/* ⚠️ Nested User Data */}
+                      <span className="name-primary">{b.user_id?.name}</span>
+                      <span className="email-secondary">{b.user_id?.email}</span>
                     </div>
                   </td>
                   <td>
                     <div className="info-stack">
-                      <span className="vehicle-primary">{b.make} {b.model}</span>
-                      <span className="reg-accent">{b.registration_number}</span>
+                      {/* ⚠️ Nested Vehicle Data */}
+                      <span className="vehicle-primary">{b.vehicle_id?.make} {b.vehicle_id?.model}</span>
+                      <span className="reg-accent">{b.vehicle_id?.registration_number}</span>
                     </div>
                   </td>
                   <td><span className="badge-service">{b.service_type}</span></td>
@@ -167,7 +169,8 @@ function AdminDashboardPage() {
                         <select 
                           className={`status-select-premium status-${(b.status || 'Pending').toLowerCase().replace(/\s+/g, '-')}`}
                           value={b.status} 
-                          onChange={(e) => handleStatusChange(b.id, e.target.value)}
+                          // ⚠️ Use b._id
+                          onChange={(e) => handleStatusChange(b._id, e.target.value)}
                         >
                           <option value="Booking Confirmed">Booking Confirmed</option>
                           <option value="Vehicle Dropped Off">Vehicle Dropped Off</option>

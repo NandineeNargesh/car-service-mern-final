@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-// Yahan LOCALHOST use karein taaki local backend se connect ho sake
 const API_BASE_URL = `${API_BASE}/api`;
 
 function BookService() {
@@ -21,14 +20,13 @@ function BookService() {
       if (!token) throw new Error('No token found. Please log in.');
 
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      // Sahi URL: localhost wala
       const response = await axios.get(`${API_BASE_URL}/vehicles`, config);
       
       setVehicles(response.data);
 
-      // Pehla vehicle automatically select karne ke liye
       if (response.data.length > 0) {
-        setBookingData(prevData => ({ ...prevData, vehicle_id: response.data[0].id }));
+        // ⚠️ Change: response.data[0]._id
+        setBookingData(prevData => ({ ...prevData, vehicle_id: response.data[0]._id }));
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Could not load your vehicles.');
@@ -56,8 +54,6 @@ function BookService() {
     try {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      
-      // Sahi URL: localhost wala
       const response = await axios.post(`${API_BASE_URL}/bookings/create`, bookingData, config);
       setMessage(response.data.message);
     } catch (err) {
@@ -77,7 +73,8 @@ function BookService() {
           <select name="vehicle_id" value={bookingData.vehicle_id} onChange={handleChange} required>
             {vehicles.length > 0 ? (
               vehicles.map((vehicle) => (
-                <option key={vehicle.id} value={vehicle.id}>
+                // ⚠️ Change: vehicle._id
+                <option key={vehicle._id} value={vehicle._id}>
                   {vehicle.make} {vehicle.model} ({vehicle.registration_number})
                 </option>
               ))
