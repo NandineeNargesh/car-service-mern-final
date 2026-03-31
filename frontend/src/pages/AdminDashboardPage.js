@@ -22,7 +22,7 @@ function AdminDashboardPage() {
     try {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const response = await axios.get(`${API_BASE}/bookings`, config);
+      const response = await axios.get(`${API_BASE_ADMIN}/bookings`, config);
       setBookings(response.data);
     } catch (err) {
       setError('Admin access denied.');
@@ -33,7 +33,7 @@ function AdminDashboardPage() {
     try {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const response = await axios.get(`${API_BASE}/stats`, config);
+      const response = await axios.get(`${API_BASE_ADMIN}/stats`, config);
       setStats(response.data);
     } catch (err) {
       console.error("Stats fetch failed");
@@ -49,7 +49,7 @@ function AdminDashboardPage() {
     try {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put(`${API_BASE}/bookings/${bookingId}/status`, { status: newStatus }, config);
+      await axios.put(`${API_BASE_ADMIN}/bookings/${bookingId}/status`, { status: newStatus }, config);
       setMessage("Status updated successfully!");
       fetchAllBookings();
       fetchStats(); // Update stats as well

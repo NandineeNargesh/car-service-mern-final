@@ -8,7 +8,7 @@ const createBookingRoutes = (db) => {
     try {
       const { vehicle_id, service_type, booking_date, time_slot } = req.body;
       await db.query(
-        'INSERT INTO public.bookings (user_id, vehicle_id, service_type, booking_date, time_slot) VALUES ($1, $2, $3, $4, $5)',
+        'INSERT INTO bookings (user_id, vehicle_id, service_type, booking_date, time_slot) VALUES ($1, $2, $3, $4, $5)',
         [req.userId, vehicle_id, service_type, booking_date, time_slot]
       );
       res.status(201).json({ message: 'Booking created successfully' });
@@ -32,8 +32,8 @@ const createBookingRoutes = (db) => {
         COALESCE(b.status, 'Pending') as status, 
         v.make, 
         v.model
-       FROM public.bookings b
-       LEFT JOIN public.vehicles v ON b.vehicle_id = v.id
+       FROM bookings b
+       LEFT JOIN vehicles v ON b.vehicle_id = v.id
        WHERE b.user_id = $1
        ORDER BY b.booking_date DESC`,
       [req.userId]

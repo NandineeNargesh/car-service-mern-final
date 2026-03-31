@@ -11,12 +11,15 @@ const { protect } = require("./middleware/authMiddleware");
 const bookingRoutes = require('./routes/bookingRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
+
 const db = new Pool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: 5432,
+  // host: process.env.DB_HOST,
+  // user: process.env.DB_USER,
+  // password: process.env.DB_PASSWORD,
+  // database: process.env.DB_NAME,
+  // port: 5432,
+   connectionString: process.env.DATABASE_URL,
+  
   ssl: { rejectUnauthorized: false }
 });
 
@@ -39,7 +42,7 @@ app.post('/api/auth/signup', async (req, res) => {
     // Front-end se 'phone' ya 'phone_number' jo bhi aa raha hai use handle karein
     const { name, email, password, phone } = req.body;
 
-    const existingUser = await db.query("SELECT * FROM public.users WHERE email = $1", [email]);
+    const existingUser = await db.query("SELECT * FROM users WHERE email = $1", [email]);
     if (existingUser.rows.length > 0) {
       return res.status(400).json({ message: "User already exists" });
     }
@@ -51,7 +54,7 @@ app.post('/api/auth/signup', async (req, res) => {
     const finalPhone = phone || ""; 
 
     const newUser = await db.query(
-      `INSERT INTO public.users (name, email, password, phone_number, is_admin) 
+      `INSERT INTO users (name, email, password, phone_number, is_admin) 
        VALUES ($1, $2, $3, $4, $5) 
        RETURNING id, name, email, is_admin`,
       [name, email, hashedPassword, finalPhone, false]
@@ -68,7 +71,7 @@ app.post('/api/auth/signup', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    const userResult = await db.query("SELECT * FROM public.users WHERE email=$1", [email]);
+    const userResult = await db.query("SELECT * FROM users WHERE email=$1", [email]);
 
     if (!userResult.rows.length) return res.status(401).json({ message: "Invalid credentials" });
 

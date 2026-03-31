@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import AdminDashboardPage from './AdminDashboardPage';
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -26,17 +27,18 @@ const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
         }
       );
 
-      const { token, user } = response.data;
+      // LoginPage.js ke handleSubmit mein change karein
+// handleSubmit ke andar response aane ke baad ye daaliye:
+const { token, user } = response.data;
+localStorage.setItem('token', token);
+localStorage.setItem('user', JSON.stringify(user));
 
-      // Save JWT token
-      localStorage.setItem('token', token);
-
-      // Redirect based on admin status
-      if (user.is_admin) {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/dashboard');
-      }
+// Role ke hisaab se Force Redirect
+if (user.is_admin === true || String(user.is_admin) === 'true') {
+    window.location.href = '/admin/dashboard'; 
+} else {
+    window.location.href = '/dashboard';
+}
     } catch (error) {
       if (error.response && error.response.data.message) {
         setMessage(error.response.data.message);

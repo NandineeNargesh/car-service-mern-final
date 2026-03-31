@@ -1,3 +1,4 @@
+
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -16,7 +17,7 @@ module.exports = (pool) => {
 
       // Check if user exists
       const existingUser = await pool.query(
-        "SELECT id FROM public.users WHERE email = $1",
+        "SELECT id FROM users WHERE email = $1",
         [email]
       );
 
@@ -29,7 +30,7 @@ module.exports = (pool) => {
 
       // Insert user (normal users default is_admin = FALSE)
       const result = await pool.query(
-        `INSERT INTO public.users (name, email, phone_number, password, is_admin)
+        `INSERT INTO users (name, email, phone_number, password, is_admin)
          VALUES ($1, $2, $3, $4, FALSE)
          RETURNING id, name, email, is_admin`,
         [name, email, phone_number, hashedPassword]
@@ -51,7 +52,7 @@ module.exports = (pool) => {
       const { email, password } = req.body;
 
       const userResult = await pool.query(
-        "SELECT * FROM public.users WHERE email = $1",
+        "SELECT * FROM users WHERE email = $1",
         [email]
       );
 

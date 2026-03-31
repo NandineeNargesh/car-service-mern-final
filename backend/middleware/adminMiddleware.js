@@ -1,7 +1,7 @@
 const createAdminMiddleware = (db) => {
   return async (req, res, next) => {
     const result = await db.query(
-      'SELECT is_admin FROM public.users WHERE id = $1',
+      'SELECT is_admin FROM users WHERE id = $1',
       [req.userId]
     );
 

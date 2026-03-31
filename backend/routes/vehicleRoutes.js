@@ -7,7 +7,7 @@ module.exports = (db) => {
   router.get("/", async (req, res) => {
     try {
       const result = await db.query(
-        "SELECT * FROM public.vehicles WHERE user_id = $1",
+        "SELECT * FROM vehicles WHERE user_id = $1",
         [req.userId]
       );
       res.json(result.rows);
